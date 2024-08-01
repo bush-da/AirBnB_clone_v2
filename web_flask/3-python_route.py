@@ -37,5 +37,6 @@ def py(text="is cool"):
     """ Display Python 'text' or default Python is cool """
     return f"Python {text.replace('_', ' ')}"
 
+
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000)
