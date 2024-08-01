@@ -13,26 +13,26 @@ from flask import Flask
 app = Flask(__name__)
 
 
-@app.route('/', strict_slashes=False)
+@app.route("/", strict_slashes=False)
 def hello_hbnb():
     """ Display Hello HBNB! """
     return "Hello HBNB!"
 
 
-@app.route('/hbnb', strict_slashes=False)
+@app.route("/hbnb", strict_slashes=False)
 def hello():
     """ Display HBNB """
     return "HBNB"
 
 
-@app.route('/c/<text>', strict_slashes=False)
+@app.route("/c/<text>", strict_slashes=False)
 def c(text):
     """ Display text variable value after C """
     return f"C {text.replace('_', ' ')}"
 
 
-@app.route('/python', defaults={'text': 'is cool'}, strict_slashes=False)
-@app.route('/python/<text>', strict_slashes=False)
+@app.route("/python", defaults={'text': 'is cool'}, strict_slashes=False)
+@app.route("/python/<text>", strict_slashes=False)
 def py(text="is cool"):
     """ Display Python 'text' or default Python is cool """
     return f"Python {text.replace('_', ' ')}"
