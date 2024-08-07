@@ -50,14 +50,11 @@ class HBNBCommand(cmd.Cmd):
         try:  # parse line left to right
             pline = line[:]  # parsed line
 
-
             # isolate <class name>
             _cls = pline[:pline.find('.')]
 
-
             # isolate and validate <command>
             _cmd = pline[pline.find('.') + 1:pline.find('(')]
-
             if _cmd not in HBNBCommand.dot_cmds:
                 raise Exception
 
@@ -65,7 +62,6 @@ class HBNBCommand(cmd.Cmd):
             pline = pline[pline.find('(') + 1:pline.find(')')]
             if pline:
                 # partition args: (<id>, [<delim>], [<*args>])
-
                 pline = pline.partition(', ')  # pline convert to tuple
 
                 # isolate _id, stripping quotes
@@ -119,21 +115,20 @@ class HBNBCommand(cmd.Cmd):
 
     def do_create(self, args):
         """ Create an object of any class"""
+        args = args.split(" ")
         if not args:
             print("** class name missing **")
             return
-        args = args.split()
-        cls_name =args[0]
+
+        cls_name = args[0]
         if cls_name not in HBNBCommand.classes:
             print("** class doesn't exist **")
             return
+
         new_instance = HBNBCommand.classes[cls_name]()
-        for parms in args[1:]:
-            key_value = parms.split('=', 1)
-            if len(key_value) != 2:
-                continue
-            key, value = key_value
-            if value.startswith('"') and value.endswith('"'):
+        for param in args[1:]:
+            key, value = param.split('=', 1)
+            if value[0] == '"' and value[-1] == '"':
                 value = value[1:-1].replace('_', ' ').replace('\\"', '"')
             elif '.' in value:
                 try:
@@ -145,10 +140,12 @@ class HBNBCommand(cmd.Cmd):
                     value = int(value)
                 except ValueError:
                     continue
+
             setattr(new_instance, key, value)
+
+        storage.new(new_instance)
         storage.save()
         print(new_instance.id)
-        storage.save()
 
     def help_create(self):
         """ Help information for the create method """
@@ -158,7 +155,6 @@ class HBNBCommand(cmd.Cmd):
     def do_show(self, args):
         """ Method to show an individual object """
         new = args.partition(" ")
-        print(new)
         c_name = new[0]
         c_id = new[2]
 
@@ -231,12 +227,12 @@ class HBNBCommand(cmd.Cmd):
             if args not in HBNBCommand.classes:
                 print("** class doesn't exist **")
                 return
-            for k, v in storage._FileStorage__objects.items():
-                if k.split('.')[0] == args:
-                    print_list.append(str(v))
+            all_obj = storage.all(HBNBCommand.classes[args])
         else:
-            for k, v in storage._FileStorage__objects.items():
-                print_list.append(str(v))
+            all_obj = storage.all()
+
+        for obj in all_obj.values():
+            print_list.append(str(obj))
 
         print(print_list)
 
