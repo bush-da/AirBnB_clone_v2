@@ -4,8 +4,15 @@ import models
 from os import getenv
 from models.base_model import BaseModel
 from models.base_model import Base
-from sqlalchemy import Column, String, Integer, Float, ForeignKey
+from models.amenity import Amenity
+from sqlalchemy import Column, String, Integer, Float, ForeignKey, Table
 from sqlalchemy.orm import relationship
+
+association_table = Table(
+    'place_amenity', Base.metadata,
+    Column('place_id', String(60), ForeignKey('places.id'), primary_key=True, nullable=False),
+    Column('amenity_id', String(60), ForeignKey('amenities.id'), primary_key=True, nullable=False)
+)
 
 
 class Place(BaseModel, Base):
@@ -22,11 +29,29 @@ class Place(BaseModel, Base):
     latitude = Column(Float)
     longitude = Column(Float)
     reviews = relationship("Review", backref='place', cascade='delete')
+    amenities = relationship("Amenity", secondary='place_amenity', viewonly=False)
     amenity_ids = []
+
     if (getenv("HBNB_MYSQL_DB") != "db"):
         @property
         def reviews(self):
+            """ get all reviews """
             review_list = []
             for review in list(models.storage.all(Review).values()):
                 review_list.append(review)
             return review_list
+
+        @property
+        def amenities(self):
+            """ get all amenities """
+            amenity_list = []
+            for amenity in list(models.storage.all(Amenity).values()):
+                if amenity.id in self.amenity_ids:
+                    amenity_list.append(amenity)
+            return amenity_list
+
+        @amenities.setter
+        def amenities(self, value):
+            """ set amenity """
+            if type(value) == Amenity:
+                self.amenity_ids.append(value.id)
