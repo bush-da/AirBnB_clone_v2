@@ -2,24 +2,21 @@
 """ Place Module for HBNB project """
 import models
 from os import getenv
-from models.base_model import BaseModel
-from models.base_model import Base
+from models.base_model import BaseModel, Base
 from models.amenity import Amenity
 from models.review import Review
 from sqlalchemy import Column, String, Integer, Float, ForeignKey, Table
 from sqlalchemy.orm import relationship
 
+# Association table for Place and Amenity many-to-many relationship
 association_table = Table(
     'place_amenity', Base.metadata,
     Column('place_id', String(60), ForeignKey('places.id'), primary_key=True, nullable=False),
     Column('amenity_id', String(60), ForeignKey('amenities.id'), primary_key=True, nullable=False)
 )
 
-
 class Place(BaseModel, Base):
     """Represents a Place for a MySQL database.
-
-    Inherits from SQLAlchemy Base and links to the MySQL table places.
 
     Attributes:
         __tablename__ (str): The name of the MySQL table to store places.
@@ -35,7 +32,7 @@ class Place(BaseModel, Base):
         longitude (sqlalchemy Float): The place's longitude.
         reviews (sqlalchemy relationship): The Place-Review relationship.
         amenities (sqlalchemy relationship): The Place-Amenity relationship.
-        amenity_ids (list): An id list of all linked amenities.
+        amenity_ids (list): A list of IDs for all linked amenities.
     """
     __tablename__ = 'places'
     city_id = Column(String(60), ForeignKey('cities.id'), nullable=False)
@@ -49,29 +46,22 @@ class Place(BaseModel, Base):
     latitude = Column(Float)
     longitude = Column(Float)
     reviews = relationship("Review", backref='place', cascade='delete')
-    amenities = relationship("Amenity", secondary='place_amenity', viewonly=False)
+    amenities = relationship("Amenity", secondary='place_amenity', back_populates='place_amenities', viewonly=False)
     amenity_ids = []
 
-    if (getenv("HBNB_TYPE_STORAGE") != "db"):
+    if getenv("HBNB_TYPE_STORAGE") != "db":
         @property
         def reviews(self):
-            """ get all reviews """
-            review_list = []
-            for review in list(models.storage.all(Review).values()):
-                review_list.append(review)
-            return review_list
+            """Gets all reviews linked to this Place."""
+            return [review for review in models.storage.all(Review).values() if review.place_id == self.id]
 
         @property
         def amenities(self):
-            """ get all amenities """
-            amenity_list = []
-            for amenity in list(models.storage.all(Amenity).values()):
-                if amenity.id in self.amenity_ids:
-                    amenity_list.append(amenity)
-            return amenity_list
+            """Gets all amenities linked to this Place."""
+            return [amenity for amenity in models.storage.all(Amenity).values() if amenity.id in self.amenity_ids]
 
         @amenities.setter
         def amenities(self, value):
-            """ set amenity """
-            if type(value) == Amenity:
+            """Sets an Amenity to this Place by appending its ID to amenity_ids, if not already present."""
+            if isinstance(value, Amenity) and value.id not in self.amenity_ids:
                 self.amenity_ids.append(value.id)
