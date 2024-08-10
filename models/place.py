@@ -3,7 +3,7 @@
 import models
 from os import getenv
 from models.base_model import BaseModel
-from models.basemodel import Base
+from models.base_model import Base
 
 
 # Association table for Place and Amenity many-to-many relationship
