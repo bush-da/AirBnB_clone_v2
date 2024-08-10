@@ -8,6 +8,11 @@ from models.base_model import Base
 
 # Association table for Place and Amenity many-to-many relationship
 if getenv("HBNB_TYPE_STORAGE") == "db":
+    from models.amenity import Amenity
+    from models.review import Review
+    from sqlalchemy import Column, String, Integer, Float, ForeignKey, Table
+    from sqlalchemy.orm import relationship
+
     association_table = Table(
         'place_amenity', Base.metadata,
         Column('place_id', String(60), ForeignKey('places.id'),
@@ -15,11 +20,6 @@ if getenv("HBNB_TYPE_STORAGE") == "db":
         Column('amenity_id', String(60), ForeignKey('amenities.id'),
                primary_key=True, nullable=False)
     )
-
-    from models.amenity import Amenity
-    from models.review import Review
-    from sqlalchemy import Column, String, Integer, Float, ForeignKey, Table
-    from sqlalchemy.orm import relationship
 
     class Place(BaseModel, Base):
         """Represents a Place for a MySQL database.
