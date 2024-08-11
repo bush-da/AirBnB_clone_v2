@@ -8,14 +8,17 @@ from flask import render_template
 
 app = Flask(__name__)
 
+
 @app.route("/cities_by_states", strict_slashes=False)
 def cities_by_states():
     """Display an HTML page with list of states with there cities
     sorted by state name """
     cities = storage.all(City).values()
     states = storage.all(State).values()
-    sorted_states = sorted(states, key=lambda state: state.name)
-    return render_template("8-cities_by_states.html", states=sorted_states, cities=cities)
+    s_states = sorted(states, key=lambda state: state.name)
+    return render_template("8-cities_by_states.html",
+                           states=s_states, cities=cities)
+
 
 @app.teardown_appcontext
 def tear_down(exc):
